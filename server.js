@@ -32,18 +32,30 @@ app.post("/create-user", async (req, res) => {
     // Expect a body like: { "name": "Asha", "email": "asha@example.com", "password": "..." }
     const { name, email, password } = req.body || {};
 
-    // Validate required fields before doing any database work.
-    if (
-        typeof name !== "string" || !name.trim() || name.trim().length > 5 ||
-        typeof email !== "string" || !email.trim() || email.trim().length > 10 ||
-        typeof password !== "string" || password.length < 8
-    ) {
-        return ApiResponse.send(
-            res,
-            400,
-            false,
-            "Provide a name (up to 5 characters), email (up to 10 characters), and password (at least 8 characters)."
-        );
+    // Validate each field individually so errors are clear and specific.
+    if (typeof name !== "string" || !name.trim()) {
+        return ApiResponse.send(res, 400, false, "Name is required.");
+    }
+    if (name.trim().length > 50) {
+        return ApiResponse.send(res, 400, false, "Name cannot exceed 50 characters.");
+    }
+
+    if (typeof email !== "string" || !email.trim()) {
+        return ApiResponse.send(res, 400, false, "Email is required.");
+    }
+    if (email.trim().length > 100) {
+        return ApiResponse.send(res, 400, false, "Email cannot exceed 100 characters.");
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+        return ApiResponse.send(res, 400, false, "Please provide a valid email format (e.g. name@example.com).");
+    }
+
+    if (typeof password !== "string" || !password) {
+        return ApiResponse.send(res, 400, false, "Password is required.");
+    }
+    if (password.length < 8) {
+        return ApiResponse.send(res, 400, false, "Password must be at least 8 characters long.");
     }
 
     try {
