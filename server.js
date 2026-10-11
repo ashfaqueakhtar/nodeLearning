@@ -15,13 +15,15 @@ app.use(express.json());
 async function createUsersTable() {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            id SERIAL PRIMARY KEY,
             name VARCHAR(100) NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     `);
 }
 
@@ -71,12 +73,14 @@ app.post("/create-user", async (req, res) => {
     }
 });
 
-// 6. Create the table first, then start accepting HTTP requests on port 5000.
+// 6. Create the table first, then start accepting HTTP requests.
+const PORT = process.env.PORT || 5001;
+
 async function startServer() {
     try {
         await createUsersTable();
-        app.listen(5000, () => {
-            console.log("Server running on port 5000");
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
         });
     } catch (error) {
         // If setup fails, do not start a server that cannot save users.
