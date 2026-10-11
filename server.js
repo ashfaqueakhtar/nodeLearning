@@ -32,53 +32,34 @@ app.post("/create-user", async (req, res) => {
     // Expect a body like: { "name": "Asha", "email": "asha@example.com", "password": "..." }
     const { name, email, password } = req.body || {};
 
-    // 1. Identify which validation rule failed (if any).
-    let errorKey = null;
+    // Validate fields and assign the error message directly using switch (true).
+    let errorMessage = null;
 
-    if (typeof name !== "string" || !name.trim()) {
-        errorKey = "NAME_REQUIRED";
-    } else if (name.trim().length > 50) {
-        errorKey = "NAME_TOO_LONG";
-    } else if (typeof email !== "string" || !email.trim()) {
-        errorKey = "EMAIL_REQUIRED";
-    } else if (email.trim().length > 100) {
-        errorKey = "EMAIL_TOO_LONG";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-        errorKey = "EMAIL_INVALID";
-    } else if (typeof password !== "string" || !password) {
-        errorKey = "PASSWORD_REQUIRED";
-    } else if (password.length < 8) {
-        errorKey = "PASSWORD_TOO_SHORT";
+    switch (true) {
+        case typeof name !== "string" || !name.trim():
+            errorMessage = "Name is required.";
+            break;
+        case name.trim().length > 50:
+            errorMessage = "Name cannot exceed 50 characters.";
+            break;
+        case typeof email !== "string" || !email.trim():
+            errorMessage = "Email is required.";
+            break;
+        case email.trim().length > 100:
+            errorMessage = "Email cannot exceed 100 characters.";
+            break;
+        case !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()):
+            errorMessage = "Please provide a valid email format (e.g. name@example.com).";
+            break;
+        case typeof password !== "string" || !password:
+            errorMessage = "Password is required.";
+            break;
+        case password.length < 8:
+            errorMessage = "Password must be at least 8 characters long.";
+            break;
     }
 
-    // 2. Resolve error message via switch statement and send response once.
-    if (errorKey) {
-        let errorMessage;
-        switch (errorKey) {
-            case "NAME_REQUIRED":
-                errorMessage = "Name is required.";
-                break;
-            case "NAME_TOO_LONG":
-                errorMessage = "Name cannot exceed 50 characters.";
-                break;
-            case "EMAIL_REQUIRED":
-                errorMessage = "Email is required.";
-                break;
-            case "EMAIL_TOO_LONG":
-                errorMessage = "Email cannot exceed 100 characters.";
-                break;
-            case "EMAIL_INVALID":
-                errorMessage = "Please provide a valid email format (e.g. name@example.com).";
-                break;
-            case "PASSWORD_REQUIRED":
-                errorMessage = "Password is required.";
-                break;
-            case "PASSWORD_TOO_SHORT":
-                errorMessage = "Password must be at least 8 characters long.";
-                break;
-            default:
-                errorMessage = "Invalid input.";
-        }
+    if (errorMessage) {
         return ApiResponse.send(res, 400, false, errorMessage);
     }
 
