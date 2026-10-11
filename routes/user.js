@@ -4,8 +4,8 @@ const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const ApiResponse = require("../network/ApiResponse");
 
-// Standard REST: POST /user (also supports POST /user/create-user for backward compatibility)
-router.post(["/", "/create-user"], async (req, res) => {
+// POST /user/create-user
+router.post("/create-user", async (req, res) => {
     const { name, email, password } = req.body || {};
 
     // Validate fields and assign the error message directly using switch (true).
